@@ -130,16 +130,16 @@ NETLIFY_SITE=datawire-ambassador
 # IF YOU MESS WITH ANY OF THESE VALUES, YOU MUST UPDATE THE VERSION NUMBERS
 # BELOW AND THEN RUN make docker-update-base
 ENVOY_REPO ?= git@github.com:datawire/envoy-private.git
-ENVOY_COMMIT ?= 5830eaa1db54cb72161a181b310f895fe0d5a723
+ENVOY_COMMIT ?= eafb638842a1c71db37f7136c62a57e7f95ed212
 AMBASSADOR_DOCKER_TAG ?= $(GIT_VERSION)
 AMBASSADOR_DOCKER_IMAGE ?= $(AMBASSADOR_DOCKER_REPO):$(AMBASSADOR_DOCKER_TAG)
 AMBASSADOR_EXTERNAL_DOCKER_IMAGE ?= $(AMBASSADOR_EXTERNAL_DOCKER_REPO):$(AMBASSADOR_DOCKER_TAG)
 
 # UPDATE THESE VERSION NUMBERS IF YOU UPDATE ANY OF THE VALUES ABOVE, THEN
 # RUN make docker-update-base.
-ENVOY_BASE_IMAGE ?= quay.io/datawire/ambassador-base:envoy-10
-AMBASSADOR_DOCKER_IMAGE_CACHED ?= quay.io/datawire/ambassador-base:go-10
-AMBASSADOR_BASE_IMAGE ?= quay.io/datawire/ambassador-base:ambassador-10
+ENVOY_BASE_IMAGE ?= quay.io/datawire/ambassador-base:envoy-10.lukeshu0
+AMBASSADOR_DOCKER_IMAGE_CACHED ?= quay.io/datawire/ambassador-base:go-10.lukeshu0
+AMBASSADOR_BASE_IMAGE ?= quay.io/datawire/ambassador-base:ambassador-10.lukeshu0
 
 KUBECONFIG ?= $(shell pwd)/cluster.yaml
 USE_KUBERNAUT ?= true
