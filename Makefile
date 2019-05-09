@@ -408,7 +408,7 @@ TELEPROXY_VERSION=0.4.9
 GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)
 
-$(TELEPROXY):
+$(TELEPROXY): venv
 	curl -o $(TELEPROXY) https://s3.amazonaws.com/datawire-static-files/teleproxy/$(TELEPROXY_VERSION)/$(GOOS)/$(GOARCH)/teleproxy
 	sudo chown root $(TELEPROXY)
 ifeq ($(shell uname -s), Darwin)
@@ -445,13 +445,13 @@ $(CLAIM_FILE):
 		echo kat-$${USER}-$(shell uuidgen) > $@; \
 	fi
 
-$(KUBERNAUT):
+$(KUBERNAUT): venv
 	curl -o $(KUBERNAUT) http://releases.datawire.io/kubernaut/$(KUBERNAUT_VERSION)/$(GOOS)/$(GOARCH)/kubernaut
 	chmod +x $(KUBERNAUT)
 
 KAT_CLIENT=venv/bin/kat_client
 
-$(KAT_CLIENT):
+$(KAT_CLIENT): venv
 	curl -OL https://github.com/datawire/kat-backend/archive/v$(KAT_BACKEND_RELEASE).tar.gz
 	tar xzf v$(KAT_BACKEND_RELEASE).tar.gz
 	chmod +x kat-backend-$(KAT_BACKEND_RELEASE)/client/bin/client_$(GOOS)_$(GOARCH)
@@ -577,15 +577,15 @@ release:
 PROTOC_VERSION = 3.5.1
 PROTOC_PLATFORM = $(patsubst darwin,osx,$(GOOS))-$(patsubst amd64,x86_64,$(patsubst 386,x86_32,$(GOARCH)))
 
-venv/protoc-$(PROTOC_VERSION)-$(PROTOC_PLATFORM).zip:
+venv/protoc-$(PROTOC_VERSION)-$(PROTOC_PLATFORM).zip: venv
 	curl -o $@ --fail -L https://github.com/protocolbuffers/protobuf/releases/download/v$(PROTOC_VERSION)/$(@F)
 venv/bin/protoc: venv/protoc-$(PROTOC_VERSION)-$(PROTOC_PLATFORM).zip
 	bsdtar -xf $< -C venv bin/protoc
 
-venv/bin/protoc-gen-gogofast: go.mod
+venv/bin/protoc-gen-gogofast: go.mod venv
 	$(FLOCK) go.mod go build -o $@ github.com/gogo/protobuf/protoc-gen-gogofast
 
-venv/bin/protoc-gen-validate: go.mod
+venv/bin/protoc-gen-validate: go.mod venv
 	$(FLOCK) go.mod go build -o $@ github.com/envoyproxy/protoc-gen-validate
 
 # Search path for .proto files
@@ -613,7 +613,7 @@ mappings += google/rpc/error_details.proto=github.com/gogo/googleapis/google/rpc
 mappings += google/rpc/status.proto=github.com/gogo/googleapis/google/rpc
 mappings += metrics.proto=istio.io/gogo-genproto/prometheus
 mappings += trace.proto=istio.io/gogo-genproto/opencensus/proto/trace/v1
-mappings += $(shell find $(CURDIR)/envoy/api/envoy -type f -name '*.proto' | sed -E 's,^$(CURDIR)/envoy/api/((.*)/[^/]*),\1=github.com/datawire/ambassador/\2,')
+mappings += $(shell find $(CURDIR)/envoy/api/envoy -type f -name '*.proto' | sed -E 's,^$(CURDIR)/envoy/api/((.*)/[^/]*),\1=github.com/datawire/ambassador/go/apis/\2,')
 
 joinlist=$(if $(word 2,$2),$(firstword $2)$1$(call joinlist,$1,$(wordlist 2,$(words $2),$2)),$2)
 comma = ,
@@ -622,12 +622,15 @@ go/apis/envoy: envoy venv/bin/protoc venv/bin/protoc-gen-gogofast venv/bin/proto
 	rm -rf $@
 	mkdir -p $@
 	set -e; find $(CURDIR)/envoy/api/envoy -type f -name '*.proto' | sed 's,/[^/]*$$,,' | uniq | while read -r dir; do \
+		echo "Generating $$dir"; \
 		./venv/bin/protoc \
 			$(addprefix --proto_path=,$(imports))  \
 			--plugin=$(CURDIR)/venv/bin/protoc-gen-gogofast --gogofast_out='$(call joinlist,$(comma),plugins=grpc $(addprefix M,$(mappings))):$(@D)' \
 			--plugin=$(CURDIR)/venv/bin/protoc-gen-validate --validate_out='lang=gogo:$(@D)' \
 			"$$dir"/*.proto; \
 	done
+# https://github.com/envoyproxy/go-control-plane/issues/173
+	find $@ -name '*.validate.go' -exec sed -E -i 's,"(envoy/.*)"$$,"github.com/datawire/ambassador/go/apis/\1",' {} +
 
 # ------------------------------------------------------------------------------
 # Virtualenv
