@@ -11,11 +11,11 @@ If you're still reading, you must be at Datawire. Congrats, you picked a fine pl
 
 1. PRs will pile up on `master`. **Don't accept PRs for which CI doesn't show passing tests.**
 
-2. Once `master` has all the release drivers, tag `master` with an RC tag, e.g. `0.33.0-rc1`.
+2. Once `master` has all the release drivers, tag `master` with an RC tag, e.g. `v0.33.0-rc1`.
 
 3. The RC tag will trigger CI to run a new build and new tests. It had better pass: if not, figure out why.
 
-4. The RC build will be available as e.g. `quay.io/datawire/ambassador:0.33.0-rc1` and also as e.g. `quay.io/datawire/ambassador:0.33.0-rc-latest`. Any other testing you want to do against this image, rock on.
+4. The RC build will be available as e.g. `quay.io/datawire/ambassador:v0.33.0-rc1` and also as e.g. `quay.io/datawire/ambassador:v0.33.0-rc-latest`. Any other testing you want to do against this image, rock on.
 
 5. When you're happy with everything, sync up the docs!
    - `make pull-docs` to pull updates from the docs repo
@@ -28,7 +28,7 @@ If you're still reading, you must be at Datawire. Congrats, you picked a fine pl
    - It is *critical* to update `docs/versions.yml` so that everyone gets the new version.
 
 7. Now for the time-critical bit.
-   - Tag `master` with a GA tag like `0.33.0` and let CI do its thing.
+   - Tag `master` with a GA tag like `v0.33.0` and let CI do its thing.
    - CI will retag the latest RC image as the GA image.
    - `make push-docs` _after the retag_ to push new docs out to the website.
 

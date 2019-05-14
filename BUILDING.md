@@ -37,7 +37,7 @@ If you want to make a doc change, see the `Making Documentation-Only Changes` se
 
 ### Structure and Branches
 
-The current shipping release of Ambassador lives here on the `master` branch. It is tagged with its version (e.g. `0.52.0`). 
+The current shipping release of Ambassador lives here on the `master` branch. It is tagged with its version (e.g. `v0.52.0`). 
 
 Changes on `master` after the last tag have not been released yet, but will be included in the next release of Ambassador.
 
